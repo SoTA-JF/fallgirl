@@ -12,14 +12,17 @@
       body {
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
+        overflow: hidden;
         font-family: Georgia, "Times New Roman", serif;
         background: linear-gradient(180deg, #f7fbff 0%, #d9ecff 100%);
         color: #1b2a41;
+        position: relative;
       }
 
       h1 {
+        position: absolute;
+        left: 50%;
+        top: -6rem;
         margin: 0;
         padding: 1.5rem 2rem;
         border: 2px solid #1b2a41;
@@ -28,6 +31,27 @@
         text-align: center;
         font-size: clamp(1.6rem, 4vw, 2.4rem);
         line-height: 1.2;
+        white-space: nowrap;
+        animation: titleFall 9s linear infinite;
+        will-change: transform;
+      }
+
+      @keyframes titleFall {
+        0% {
+          transform: translate(-50%, -15vh) rotate(-4deg);
+        }
+        25% {
+          transform: translate(-20vw, 20vh) rotate(5deg);
+        }
+        50% {
+          transform: translate(12vw, 45vh) rotate(-3deg);
+        }
+        75% {
+          transform: translate(-10vw, 70vh) rotate(4deg);
+        }
+        100% {
+          transform: translate(18vw, 120vh) rotate(-2deg);
+        }
       }
     </style>
   </head>
