@@ -39,7 +39,7 @@
       #emoji-layer {
         position: fixed;
         inset: 0;
-        pointer-events: none;
+        pointer-events: auto;
         overflow: hidden;
         z-index: 2;
       }
@@ -54,7 +54,30 @@
         animation-name: float-up;
         animation-timing-function: linear;
         animation-fill-mode: forwards;
-        mix-blend-mode: screen;
+        cursor: pointer;
+      }
+
+      .floating-emoji img {
+        display: block;
+        width: 100%;
+        height: auto;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.5));
+      }
+
+      .floating-emoji img.is-popping {
+        animation: pop 280ms ease;
+      }
+
+      @keyframes pop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.22);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
 
       @keyframes float-up {
@@ -145,21 +168,30 @@
       }
 
       function spawnFloatingEmoji() {
-        const emoji = document.createElement('img');
+        const emoji = document.createElement('div');
         emoji.className = 'floating-emoji';
-        emoji.src = emojiSource;
-        emoji.alt = '';
-        emoji.decoding = 'async';
-        emoji.loading = 'lazy';
+
+        const image = document.createElement('img');
+        image.src = emojiSource;
+        image.alt = '';
+        image.decoding = 'async';
+        image.loading = 'lazy';
+
         emoji.style.left = `${randomRange(2, 90)}vw`;
         emoji.style.animationDuration = `${randomRange(4.8, 8.5)}s`;
         emoji.style.animationDelay = `${randomRange(0, 0.6)}s`;
         emoji.style.setProperty('--drift', `${randomRange(-130, 130)}px`);
         emoji.style.setProperty('--start-rot', `${randomRange(-18, 18)}deg`);
         emoji.style.setProperty('--end-rot', `${randomRange(-65, 65)}deg`);
-        emoji.style.filter = `drop-shadow(0 8px 10px rgba(255, 255, 255, ${randomRange(0.1, 0.2)}))`;
+
+        emoji.addEventListener('click', () => {
+          image.classList.remove('is-popping');
+          void image.offsetWidth;
+          image.classList.add('is-popping');
+        });
 
         emoji.addEventListener('animationend', () => emoji.remove(), { once: true });
+        emoji.appendChild(image);
         emojiLayer.appendChild(emoji);
       }
 
