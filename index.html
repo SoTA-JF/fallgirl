@@ -22,7 +22,7 @@
       h1 {
         position: absolute;
         left: 50%;
-        top: -6rem;
+        top: 0;
         margin: 0;
         padding: 1.5rem 2rem;
         border: 2px solid #1b2a41;
@@ -32,30 +32,65 @@
         font-size: clamp(1.6rem, 4vw, 2.4rem);
         line-height: 1.2;
         white-space: nowrap;
-        animation: titleFall 9s linear infinite;
         will-change: transform;
-      }
-
-      @keyframes titleFall {
-        0% {
-          transform: translate(-50%, -15vh) rotate(-4deg);
-        }
-        25% {
-          transform: translate(-20vw, 20vh) rotate(5deg);
-        }
-        50% {
-          transform: translate(12vw, 45vh) rotate(-3deg);
-        }
-        75% {
-          transform: translate(-10vw, 70vh) rotate(4deg);
-        }
-        100% {
-          transform: translate(18vw, 120vh) rotate(-2deg);
-        }
+        transform: translate(-50%, -15vh) rotate(-4deg);
       }
     </style>
   </head>
   <body>
     <h1>Hello, I am the girl who's falling.</h1>
+
+    <script>
+      const fallingTitle = document.querySelector("h1");
+
+      let fallStartTime = performance.now();
+      let windSeed = Math.random() * Math.PI * 2;
+      let fallDurationMs = 9000;
+      let driftAmplitude = 16;
+      let secondaryAmplitude = 9;
+      let driftBias = 0;
+      let spinAmplitude = 5;
+
+      function resetFall(now) {
+        fallStartTime = now;
+        windSeed = Math.random() * Math.PI * 2;
+        fallDurationMs = 7600 + Math.random() * 3600;
+        driftAmplitude = 10 + Math.random() * 16;
+        secondaryAmplitude = 5 + Math.random() * 11;
+        driftBias = -8 + Math.random() * 16;
+        spinAmplitude = 2.5 + Math.random() * 4.5;
+      }
+
+      function animateFall(now) {
+        const progress = (now - fallStartTime) / fallDurationMs;
+
+        if (progress >= 1) {
+          resetFall(now);
+        }
+
+        const currentProgress = Math.min(progress, 1);
+        const y = -15 + currentProgress * 135;
+
+        const primarySway =
+          Math.sin(currentProgress * Math.PI * 2.5 + windSeed) * driftAmplitude;
+        const secondarySway =
+          Math.sin(currentProgress * Math.PI * 7.5 + windSeed * 0.6) *
+          secondaryAmplitude;
+        const easing = Math.sin(currentProgress * Math.PI);
+        const x = primarySway + secondarySway * easing + driftBias;
+
+        const rotation =
+          Math.sin(currentProgress * Math.PI * 5 + windSeed * 0.4) * spinAmplitude;
+
+        fallingTitle.style.transform = `translate(calc(-50% + ${x.toFixed(2)}vw), ${y.toFixed(2)}vh) rotate(${rotation.toFixed(2)}deg)`;
+
+        requestAnimationFrame(animateFall);
+      }
+
+      requestAnimationFrame((now) => {
+        resetFall(now);
+        animateFall(now);
+      });
+    </script>
   </body>
 </html>
