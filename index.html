@@ -14,8 +14,8 @@
         min-height: 100vh;
         overflow: hidden;
         font-family: Georgia, "Times New Roman", serif;
-        background: linear-gradient(180deg, #f7fbff 0%, #d9ecff 100%);
-        color: #1b2a41;
+        background: #000;
+        color: #f4f8ff;
         position: relative;
       }
 
@@ -25,22 +25,62 @@
         top: -6rem;
         margin: 0;
         padding: 1.5rem 2rem;
-        border: 2px solid #1b2a41;
+        border: 2px solid #f4f8ff;
         border-radius: 0.75rem;
-        background: rgba(255, 255, 255, 0.75);
+        background: rgba(0, 0, 0, 0.55);
         text-align: center;
         font-size: clamp(1.6rem, 4vw, 2.4rem);
         line-height: 1.2;
         white-space: nowrap;
         will-change: transform;
+        z-index: 3;
+      }
+
+      #emoji-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 2;
+      }
+
+      .floating-emoji {
+        position: absolute;
+        bottom: -120px;
+        width: clamp(42px, 5.5vw, 80px);
+        height: auto;
+        opacity: 0;
+        will-change: transform, opacity;
+        animation-name: float-up;
+        animation-timing-function: linear;
+        animation-fill-mode: forwards;
+        mix-blend-mode: screen;
+      }
+
+      @keyframes float-up {
+        0% {
+          transform: translate3d(0, 0, 0) scale(0.9) rotate(var(--start-rot));
+          opacity: 0;
+        }
+        15% {
+          opacity: 0.92;
+        }
+        100% {
+          transform: translate3d(var(--drift), calc(-100vh - 220px), 0) scale(1.1)
+            rotate(var(--end-rot));
+          opacity: 0;
+        }
       }
     </style>
   </head>
   <body>
     <h1 id="falling-title">Hello, I am the girl who's falling.</h1>
+    <div id="emoji-layer" aria-hidden="true"></div>
 
     <script>
       const title = document.getElementById('falling-title');
+      const emojiLayer = document.getElementById('emoji-layer');
+      const emojiSource = 'IMG_5275 void.jpg';
 
       const state = {
         y: -120,
@@ -104,8 +144,32 @@
         requestAnimationFrame(animate);
       }
 
+      function spawnFloatingEmoji() {
+        const emoji = document.createElement('img');
+        emoji.className = 'floating-emoji';
+        emoji.src = emojiSource;
+        emoji.alt = '';
+        emoji.decoding = 'async';
+        emoji.loading = 'lazy';
+        emoji.style.left = `${randomRange(2, 90)}vw`;
+        emoji.style.animationDuration = `${randomRange(4.8, 8.5)}s`;
+        emoji.style.animationDelay = `${randomRange(0, 0.6)}s`;
+        emoji.style.setProperty('--drift', `${randomRange(-130, 130)}px`);
+        emoji.style.setProperty('--start-rot', `${randomRange(-18, 18)}deg`);
+        emoji.style.setProperty('--end-rot', `${randomRange(-65, 65)}deg`);
+        emoji.style.filter = `drop-shadow(0 8px 10px rgba(255, 255, 255, ${randomRange(0.1, 0.2)}))`;
+
+        emoji.addEventListener('animationend', () => emoji.remove(), { once: true });
+        emojiLayer.appendChild(emoji);
+      }
+
       resetFall(state.lastTime);
       requestAnimationFrame(animate);
+
+      for (let i = 0; i < 8; i += 1) {
+        setTimeout(spawnFloatingEmoji, i * 230);
+      }
+      setInterval(spawnFloatingEmoji, 650);
     </script>
   </body>
 </html>
