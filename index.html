@@ -3,109 +3,143 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fallgirl</title>
+    <title>Fallgirl Dreams</title>
     <style>
       :root {
         color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
         min-height: 100vh;
         overflow: hidden;
+        display: grid;
+        place-items: center;
         font-family: Georgia, "Times New Roman", serif;
-        background: linear-gradient(180deg, #f7fbff 0%, #d9ecff 100%);
+        background: radial-gradient(circle at 20% 20%, #fff7d9 0%, #dff0ff 45%, #ccdefa 100%);
         color: #1b2a41;
         position: relative;
       }
 
-      h1 {
+      .dream-field {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .dream {
         position: absolute;
-        left: 50%;
-        top: -6rem;
+        bottom: -3rem;
+        opacity: 0;
+        animation-name: dream-rise;
+        animation-timing-function: linear;
+        animation-fill-mode: forwards;
+        text-shadow: 0 8px 18px rgba(27, 42, 65, 0.2);
+        user-select: none;
+        will-change: transform, opacity;
+      }
+
+      .girl {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        gap: 0.65rem;
+        justify-items: center;
+        padding: 1.2rem 1.4rem;
+        border: 2px solid rgba(27, 42, 65, 0.35);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.68);
+        backdrop-filter: blur(2px);
+        box-shadow: 0 10px 26px rgba(27, 42, 65, 0.14);
+      }
+
+      .girl .emoji {
+        font-size: clamp(4rem, 10vw, 7rem);
+        animation: bob 2.8s ease-in-out infinite;
+      }
+
+      .girl .caption {
         margin: 0;
-        padding: 1.5rem 2rem;
-        border: 2px solid #1b2a41;
-        border-radius: 0.75rem;
-        background: rgba(255, 255, 255, 0.75);
-        text-align: center;
-        font-size: clamp(1.6rem, 4vw, 2.4rem);
-        line-height: 1.2;
-        white-space: nowrap;
-        will-change: transform;
+        font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+        font-weight: 600;
+      }
+
+      @keyframes dream-rise {
+        0% {
+          transform: translate3d(0, 0, 0) scale(0.8) rotate(0deg);
+          opacity: 0;
+        }
+        12% {
+          opacity: 0.95;
+        }
+        100% {
+          transform: translate3d(var(--drift), -115vh, 0) scale(1.15) rotate(var(--spin));
+          opacity: 0;
+        }
+      }
+
+      @keyframes bob {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
       }
     </style>
   </head>
   <body>
-    <h1 id="falling-title">Hello, I am the girl who's falling.</h1>
+    <div class="dream-field" id="dream-field" aria-hidden="true"></div>
+
+    <section class="girl" aria-label="Girl in school dreaming big">
+      <div class="emoji">👩‍🎓</div>
+      <p class="caption">Dreaming beyond the classroom ✨</p>
+    </section>
 
     <script>
-      const title = document.getElementById('falling-title');
-
-      const state = {
-        y: -120,
-        x: 0,
-        driftVelocity: 0,
-        driftTarget: 0,
-        rotation: 0,
-        rotationVelocity: 0,
-        swayPhase: Math.random() * Math.PI * 2,
-        nextGustAt: 0,
-        lastTime: performance.now()
-      };
+      const dreamField = document.getElementById('dream-field');
+      const dreamEmojis = ['🌟', '📚', '🧠', '🎨', '🎵', '🚀', '💡', '🏆', '🩺', '🛠️', '🌍', '🧪'];
 
       function randomRange(min, max) {
         return min + Math.random() * (max - min);
       }
 
-      function resetFall(now) {
-        state.y = -120;
-        state.x = randomRange(-80, 80);
-        state.driftVelocity = 0;
-        state.driftTarget = randomRange(-14, 14);
-        state.rotation = randomRange(-6, 6);
-        state.rotationVelocity = randomRange(-8, 8);
-        state.swayPhase = Math.random() * Math.PI * 2;
-        state.nextGustAt = now + randomRange(350, 900);
+      function spawnDream() {
+        const dream = document.createElement('span');
+        dream.className = 'dream';
+        dream.textContent = dreamEmojis[Math.floor(Math.random() * dreamEmojis.length)];
+
+        const left = randomRange(2, 96);
+        const duration = randomRange(5.5, 9.5);
+        const delay = randomRange(-1.5, 0);
+        const size = randomRange(1.3, 2.4);
+        const drift = `${randomRange(-160, 160)}px`;
+        const spin = `${randomRange(-36, 36)}deg`;
+
+        dream.style.left = `${left}vw`;
+        dream.style.fontSize = `${size}rem`;
+        dream.style.animationDuration = `${duration}s`;
+        dream.style.animationDelay = `${delay}s`;
+        dream.style.setProperty('--drift', drift);
+        dream.style.setProperty('--spin', spin);
+
+        dream.addEventListener('animationend', () => {
+          dream.remove();
+        });
+
+        dreamField.appendChild(dream);
       }
 
-      function animate(now) {
-        const dt = Math.min((now - state.lastTime) / 1000, 0.04);
-        state.lastTime = now;
-
-        if (state.y <= -100 || state.y > window.innerHeight + 140) {
-          resetFall(now);
-        }
-
-        if (now >= state.nextGustAt) {
-          state.driftTarget = randomRange(-28, 28);
-          state.rotationVelocity += randomRange(-40, 40);
-          state.nextGustAt = now + randomRange(250, 800);
-        }
-
-        const fallSpeed = 110;
-        state.y += fallSpeed * dt;
-
-        const driftResponse = 2.6;
-        state.driftVelocity += (state.driftTarget - state.driftVelocity) * driftResponse * dt;
-
-        state.swayPhase += dt * randomRange(2.4, 3.2);
-        const featherSway = Math.sin(state.swayPhase) * 24;
-
-        state.x += (state.driftVelocity + featherSway * 0.25) * dt;
-        state.x = Math.max(-window.innerWidth * 0.45, Math.min(window.innerWidth * 0.45, state.x));
-
-        state.rotationVelocity *= 0.97;
-        state.rotation += state.rotationVelocity * dt + state.driftVelocity * 0.05;
-        state.rotation = Math.max(-18, Math.min(18, state.rotation));
-
-        title.style.transform = `translate(${state.x}px, ${state.y}px) rotate(${state.rotation}deg)`;
-
-        requestAnimationFrame(animate);
+      for (let i = 0; i < 14; i += 1) {
+        setTimeout(spawnDream, i * 260);
       }
 
-      resetFall(state.lastTime);
-      requestAnimationFrame(animate);
+      setInterval(spawnDream, 380);
     </script>
   </body>
 </html>
