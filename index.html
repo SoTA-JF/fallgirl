@@ -75,8 +75,10 @@
         display: block;
         width: 100%;
         height: auto;
-        filter: none;
+        /* Push near-black values down while lifting highlights for cleaner additive blending. */
+        filter: brightness(1.18) contrast(1.5);
         mix-blend-mode: screen;
+        mix-blend-mode: plus-lighter;
       }
 
       .floating-emoji.is-popping {
